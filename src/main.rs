@@ -28,7 +28,7 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
         let first = token.next().unwrap();
         if first == "rom" {
             for x in token {
-                rom.push(parser(x) as i16);
+                rom.push(parser(x));
             }
         } else {
             // eprintln!("{line}");
@@ -44,33 +44,52 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
     (prog, rom)
 }
 
+// Memory & memory mapped functions
+fn mem_rd(data: &[i16], addr: u8) -> i16 {
+    match addr {
+        // Stdin
+        0 => {
+            let mut inp: [u8; 1] = [0; 1];
+            io::stdin().read_exact(&mut inp).expect("failed to read");
+            inp[0] as i16
+        }
+        // Stdout
+        1 => 0,
+        // RAM, ROM
+        _ => data[addr as usize],
+    }
+}
+
+// Memory & memory mapped functions
+fn mem_wr(data: &mut [i16], addr: u8, value: i16) {
+    match addr {
+        // Stdin
+        0 => (),
+        // Stdout
+        1 => print!("{}", char::from_u32(value as u32).unwrap()),
+        // RAM, ROM write not allowed
+        _ => {
+            if addr < 0x80 {
+                data[addr as usize] = value
+            }
+        }
+    }
+}
+
 fn vcpu_runner(prog: &[Instr], rom: &[i16]) {
     // RAM init with rom copy
     let mut data: [i16; 256] = [0; 256];
     data[0x80..0x80 + rom.len()].copy_from_slice(rom);
     let mut pc = 0;
+
+    // CPU run
     while pc < prog.len() {
         let instr = prog[pc];
         if DEBUG {
             eprintln!("{pc}. {instr:?}");
         }
-        // RAM 0. address --> I/O
-        let reg_b = if instr.1 != 0 {
-            data[instr.1 as usize]
-        } else {
-            let mut inp: [u8; 1] = [0; 1];
-            io::stdin().read_exact(&mut inp).expect("failed to read");
-            inp[0] as i16
-        };
-        // Substraction
-        let reg_a = data[(instr.0 & 0x7f) as usize];
-        let result = reg_a - reg_b;
-        data[(instr.0 & 0x7f) as usize] = result;
-        // Addr 0 --> RAM & out
-        if instr.0 as usize == 0 {
-            print!("{}", char::from_u32(data[instr.0 as usize] as u32).unwrap());
-            data[instr.0 as usize] = 0; // zero
-        }
+        let result = mem_rd(&data, instr.0) - mem_rd(&data, instr.1);
+        mem_wr(&mut data, instr.0, result);
         // Jump_rel if zero or lesser
         if result <= 0 {
             pc += instr.2 as usize;
