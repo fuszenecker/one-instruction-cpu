@@ -4,7 +4,7 @@
 # ROM 0x80 .. 0xFF
 # --------------------------------
 # out default value is always 0, so  out = 0 - reg;
-# Operation:  addr0 -= addr1 and if 0, PC += arg2
+# Operation:  addr0 -= addr1 and if not 0, PC += arg2
 # --------------------------------
 
 rom 0x48 0x65 0x6C 0x6C 0x6F 0x20 
