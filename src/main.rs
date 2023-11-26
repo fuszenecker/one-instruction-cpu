@@ -1,8 +1,6 @@
 use std::fs::File;
 use std::io::{self, Read};
 
-const DEBUG: bool = false;
-
 // addrA addrB jmpaddr
 type Instr = (u8, u8, i16);
 
@@ -31,15 +29,11 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
                 rom.push(parser(x));
             }
         } else {
-            // eprintln!("{line}");
             let addr_a = parser(first) as u8;
             let addr_b = parser(token.next().unwrap()) as u8;
             let jmpaddr = parser(token.next().unwrap());
             prog.push((addr_a, addr_b, jmpaddr));
         }
-    }
-    if DEBUG {
-        eprintln!("Prog: {prog:?}\nROM: {rom:?}");
     }
     (prog, rom)
 }
@@ -67,12 +61,10 @@ fn mem_wr(data: &mut [i16], addr: u8, value: i16) {
         0 => (),
         // Stdout
         1 => print!("{}", char::from_u32(value as u32).unwrap()),
-        // RAM, ROM write not allowed
-        _ => {
-            if addr < 0x80 {
-                data[addr as usize] = value
-            }
-        }
+        // ROM write not allowed
+        0x80..=0xff => (),
+        // RAM
+        _ => data[addr as usize] = value,
     }
 }
 
@@ -85,9 +77,6 @@ fn vcpu_runner(prog: &[Instr], rom: &[i16]) {
     // CPU run
     while pc < prog.len() {
         let instr = prog[pc];
-        if DEBUG {
-            eprintln!("{pc}. {instr:?}");
-        }
         let result = mem_rd(&data, instr.0) - mem_rd(&data, instr.1);
         mem_wr(&mut data, instr.0, result);
         // Jump_rel if zero or less
