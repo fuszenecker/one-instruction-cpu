@@ -67,7 +67,7 @@ fn vcpu_runner(prog: &[Instr], rom: &[u8]) {
             data[instr.0 as usize] = 0; // zero
         }
         // Jump_rel if zero
-        if data[instr.0 as usize] == 0 {
+        if data[instr.0 as usize] != 0 {
             pc += instr.2 as usize;
         }
         pc += 1;

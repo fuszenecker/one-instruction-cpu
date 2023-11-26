@@ -6,6 +6,6 @@ Special properties:
 
 How works?
  * [DSTaddr] -= [SRCaddr];
- * if [DSTaddr] == 0 { PC += JMPaddr }
+ * if [DSTaddr] != 0 { PC += JMPaddr }
 
 All other function can create as a memory mapped function.
