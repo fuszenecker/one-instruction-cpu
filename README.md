@@ -4,7 +4,7 @@ Special properties:
  * No opcode, only args
  * Args: DSTaddr SRCaddr JMPaddr(relative)
 
-How works?
+How it works?
  * [DSTaddr] -= [SRCaddr];
  * if [DSTaddr] != 0 { PC += JMPaddr }
 
