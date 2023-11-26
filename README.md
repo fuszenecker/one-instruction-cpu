@@ -3,7 +3,7 @@
 Special properties:
  * No opcode, only args
  * Args: addrA addrB JMPaddr(relative)
- * memory addresses and values are u8, JMPaddr is i16.
+ * memory addresses is u8, data and JMPaddr are i16.
  * half of addressed memory is RAM, second half is preloaded "ROM" area. 
  * some memory address has a special function, e.g. addr-0 is INPUT/OUTPUT.
 
