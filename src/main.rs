@@ -40,12 +40,11 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
 
 // -- VCPU Runner --
 
-#[allow(clippy::upper_case_acronyms)]
-struct VCPU {
+struct Vcpu {
     data: [i16; 256],
 }
 
-impl VCPU {
+impl Vcpu {
     // Memory & memory mapped functions
     fn mem_rd(&self, addr: u8) -> i16 {
         match addr {
@@ -78,7 +77,7 @@ impl VCPU {
 
     pub fn new() -> Self {
         let data: [i16; 256] = [0; 256];
-        VCPU { data }
+        Vcpu { data }
     }
 
     pub fn runner(&mut self, prog: &[Instr], rom: &[i16]) {
@@ -104,7 +103,7 @@ fn main() {
         let mut src = String::new();
         file.read_to_string(&mut src).expect("failed to read");
         let (prog, rom) = compiler(&src);
-        let mut vcpu = VCPU::new();
+        let mut vcpu = Vcpu::new();
         vcpu.runner(&prog, &rom);
     } else {
         eprintln!("usage: brainfuck <file.bf>");
