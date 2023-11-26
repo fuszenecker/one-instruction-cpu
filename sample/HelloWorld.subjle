@@ -10,7 +10,7 @@
 # I/O out default value is always 0, so  out = 0 - mem[addrB];
 # --------------------------------
 
-# negative charchode
+# negative charcode
 # ------------------
 rom -0x48 -0x65 -0x6C -0x6C -0x6F -0x20 
 rom -0x57 -0x6F -0x72 -0x6C -0x64 -0x21 -0x0A # Hello World!\n
