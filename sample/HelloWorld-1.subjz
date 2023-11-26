@@ -1,10 +1,12 @@
 # --------------------------------
-# I/O 0x00
-# RAM 0x01 .. 0x7F
-# ROM 0x80 .. 0xFF
+# Func mem_addr
+# I/O   0x00
+# RAM   0x01 .. 0x7F
+# ROM   0x80 .. 0xFF
 # --------------------------------
-# out default value is always 0, so  out = 0 - reg;
-# Operation:  addr0 -= addr1 and if not 0, PC += arg2
+# Instruction format: addrA addrB JMPaddr
+# Operation:  mem[addrA] -= mem[addrB] and if not 0, PC += JMPaddr
+# I/O out default value is always 0, so  out = 0 - mem[addrB];
 # --------------------------------
 
 rom 0x48 0x65 0x6C 0x6C 0x6F 0x20 
