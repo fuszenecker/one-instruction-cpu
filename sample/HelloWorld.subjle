@@ -5,7 +5,7 @@
 # ROM   0x80 .. 0xFF
 # --------------------------------
 # Instruction format: addrA addrB JMPaddr
-# Operation:  mem[addrA] -= mem[addrB] and if not 0, PC += JMPaddr
+# Operation:  mem[addrA] -= mem[addrB] and if <= 0, PC += JMPaddr
 # I/O out default value is always 0, so  out = 0 - mem[addrB];
 # --------------------------------
 
@@ -13,11 +13,10 @@
 # ------------------
 rom -0x48 -0x65 -0x6C -0x6C -0x6F -0x20 
 rom -0x57 -0x6F -0x72 -0x6C -0x64 -0x21 -0x0A # Hello World!\n
-rom 0x0a 0x01    # for loop
+rom  10 -1    # for loop
 
 # -- start --
-1 0x8d 0        # 0 - 0x0a
-2 1    0        # 0 - (0-0x0a)
+1 0x8d 0        # 0 - 10
 # ---- loop inner -----
 0 0x80 0	# 0x00 - 'H' from rom
 0 0x81 0	# 0x00 - 'e' from rom
@@ -33,4 +32,4 @@ rom 0x0a 0x01    # for loop
 0 0x8b 0
 0 0x8c 0
 # ---- loop inner end -----
-2 0x8e -14       # 0x0a - 1 ==> loop if not zero
+1 0x8e -14       # -0x0a - 0xff ==> loop if zero or less

@@ -16,7 +16,7 @@ fn parser(value: &str) -> i16 {
     }
 }
 
-fn compiler(src: &str) -> (Vec<Instr>, Vec<u8>) {
+fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
     let mut prog = vec![];
     let mut rom = vec![];
     for (_i, line) in src.lines().enumerate() {
@@ -28,7 +28,7 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<u8>) {
         let first = token.next().unwrap();
         if first == "rom" {
             for x in token {
-                rom.push(parser(x) as u8);
+                rom.push(parser(x) as i16);
             }
         } else {
             // eprintln!("{line}");
@@ -44,9 +44,9 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<u8>) {
     (prog, rom)
 }
 
-fn vcpu_runner(prog: &[Instr], rom: &[u8]) {
+fn vcpu_runner(prog: &[Instr], rom: &[i16]) {
     // RAM init with rom copy
-    let mut data: [u8; 256] = [0; 256];
+    let mut data: [i16; 256] = [0; 256];
     data[0x80..0x80 + rom.len()].copy_from_slice(rom);
     let mut pc = 0;
     while pc < prog.len() {
@@ -55,22 +55,24 @@ fn vcpu_runner(prog: &[Instr], rom: &[u8]) {
             eprintln!("{pc}. {instr:?}");
         }
         // RAM 0. address --> I/O
-        let src = if instr.1 != 0 {
+        let reg_b = if instr.1 != 0 {
             data[instr.1 as usize]
         } else {
             let mut inp: [u8; 1] = [0; 1];
             io::stdin().read_exact(&mut inp).expect("failed to read");
-            inp[0]
+            inp[0] as i16
         };
         // Substraction
-        data[(instr.0 & 0x7f) as usize] -= src;
+        let reg_a = data[(instr.0 & 0x7f) as usize];
+        let result = reg_a - reg_b;
+        data[(instr.0 & 0x7f) as usize] = result;
         // Addr 0 --> RAM & out
         if instr.0 as usize == 0 {
-            print!("{}", data[instr.0 as usize] as char);
+            print!("{}", char::from_u32(data[instr.0 as usize] as u32).unwrap());
             data[instr.0 as usize] = 0; // zero
         }
-        // Jump_rel if zero
-        if data[instr.0 as usize] != 0 {
+        // Jump_rel if zero or lesser
+        if result <= 0 {
             pc += instr.2 as usize;
         }
         pc += 1;

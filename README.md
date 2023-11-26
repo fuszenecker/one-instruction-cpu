@@ -9,6 +9,6 @@ Special properties:
 
 How it works?
  * mem[addrA] -= mem[addrB];
- * if mem[addrA] != 0 { PC += JMPaddr }
+ * if mem[addrA] <= 0 { PC += JMPaddr }
 
 All other function can create as a memory mapped function.
