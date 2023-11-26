@@ -79,7 +79,6 @@ fn vcpu_runner(prog: &[Instr], rom: &[i16]) {
         let instr = prog[pc];
         let result = mem_rd(&data, instr.0) - mem_rd(&data, instr.1);
         mem_wr(&mut data, instr.0, result);
-        // Jump_rel if zero or less
         if result <= 0 {
             pc += instr.2 as usize;
         }
