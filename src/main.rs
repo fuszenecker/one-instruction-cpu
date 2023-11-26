@@ -9,6 +9,8 @@ type Instr = (u8, u8, i16);
 fn parser(value: &str) -> i16 {
     if value.starts_with("0x") {
         i16::from_str_radix(value.strip_prefix("0x").unwrap(), 16).unwrap()
+    } else if value.starts_with("-0x") {
+        -i16::from_str_radix(value.strip_prefix("-0x").unwrap(), 16).unwrap()
     } else {
         value.parse().unwrap()
     }
@@ -25,7 +27,7 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<u8>) {
         let mut token = rowstart.split_whitespace();
         let first = token.next().unwrap();
         if first == "rom" {
-            while let Some(x) = token.next() {
+            for x in token {
                 rom.push(parser(x) as u8);
             }
         } else {
