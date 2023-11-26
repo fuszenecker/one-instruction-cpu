@@ -33,4 +33,4 @@ rom  10 -1    # for loop
 1 0x8b 0
 1 0x8c 0
 # ---- loop inner end -----
-2 0x8e -14       # -0x0a - 0xff ==> loop if zero or less
+2 0x8e -14       # 10 -  -1 ==> loop if zero or less
