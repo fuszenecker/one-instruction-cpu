@@ -5,7 +5,7 @@ Special properties:
  * Args: DSTaddr SRCaddr JMPaddr(relative)
 
 How it works?
- * [DSTaddr] -= [SRCaddr];
- * if [DSTaddr] != 0 { PC += JMPaddr }
+ * mem[DSTaddr] -= mem[SRCaddr];
+ * if mem[DSTaddr] != 0 { PC += JMPaddr }
 
 All other function can create as a memory mapped function.
