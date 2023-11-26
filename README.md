@@ -2,10 +2,13 @@
 
 Special properties:
  * No opcode, only args
- * Args: DSTaddr SRCaddr JMPaddr(relative)
+ * Args: addrA addrB JMPaddr(relative)
+ * memory addresses and values are u8, JMPaddr is i16.
+ * half of addressed memory is RAM, second half is preloades "ROM" area. 
+ * some memory address has a special function, e.g. addr-0 is INPUT/OUTPUT.
 
 How it works?
- * mem[DSTaddr] -= mem[SRCaddr];
- * if mem[DSTaddr] != 0 { PC += JMPaddr }
+ * mem[addrA] -= mem[addrB];
+ * if mem[addrA] != 0 { PC += JMPaddr }
 
 All other function can create as a memory mapped function.
