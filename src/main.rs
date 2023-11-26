@@ -38,51 +38,63 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<i16>) {
     (prog, rom)
 }
 
-// Memory & memory mapped functions
-fn mem_rd(data: &[i16], addr: u8) -> i16 {
-    match addr {
-        // Stdin
-        0 => {
-            let mut inp: [u8; 1] = [0; 1];
-            io::stdin().read_exact(&mut inp).expect("failed to read");
-            inp[0] as i16
-        }
-        // Stdout
-        1 => 0,
-        // RAM, ROM
-        _ => data[addr as usize],
-    }
+// -- VCPU Runner --
+
+#[allow(clippy::upper_case_acronyms)]
+struct VCPU {
+    data: [i16; 256],
 }
 
-// Memory & memory mapped functions
-fn mem_wr(data: &mut [i16], addr: u8, value: i16) {
-    match addr {
-        // Stdin
-        0 => (),
-        // Stdout
-        1 => print!("{}", char::from_u32(value as u32).unwrap()),
-        // ROM write not allowed
-        0x80..=0xff => (),
-        // RAM
-        _ => data[addr as usize] = value,
-    }
-}
-
-fn vcpu_runner(prog: &[Instr], rom: &[i16]) {
-    // RAM init with rom copy
-    let mut data: [i16; 256] = [0; 256];
-    data[0x80..0x80 + rom.len()].copy_from_slice(rom);
-    let mut pc = 0;
-
-    // CPU run
-    while pc < prog.len() {
-        let instr = prog[pc];
-        let result = mem_rd(&data, instr.0) - mem_rd(&data, instr.1);
-        mem_wr(&mut data, instr.0, result);
-        if result <= 0 {
-            pc += instr.2 as usize;
+impl VCPU {
+    // Memory & memory mapped functions
+    fn mem_rd(&self, addr: u8) -> i16 {
+        match addr {
+            // Stdin
+            0 => {
+                let mut inp: [u8; 1] = [0; 1];
+                io::stdin().read_exact(&mut inp).expect("failed to read");
+                inp[0] as i16
+            }
+            // Stdout
+            1 => 0,
+            // RAM, ROM
+            _ => self.data[addr as usize],
         }
-        pc += 1;
+    }
+
+    // Memory & memory mapped functions
+    fn mem_wr(&mut self, addr: u8, value: i16) {
+        match addr {
+            // Stdin
+            0 => (),
+            // Stdout
+            1 => print!("{}", char::from_u32(value as u32).unwrap()),
+            // ROM write not allowed
+            0x80..=0xff => (),
+            // RAM
+            _ => self.data[addr as usize] = value,
+        }
+    }
+
+    pub fn new() -> Self {
+        let data: [i16; 256] = [0; 256];
+        VCPU { data }
+    }
+
+    pub fn runner(&mut self, prog: &[Instr], rom: &[i16]) {
+        self.data[0x80..0x80 + rom.len()].copy_from_slice(rom);
+        let mut pc = 0;
+
+        // CPU run
+        while pc < prog.len() {
+            let instr = prog[pc];
+            let result = self.mem_rd(instr.0) - self.mem_rd(instr.1);
+            self.mem_wr(instr.0, result);
+            if result <= 0 {
+                pc += instr.2 as usize;
+            }
+            pc += 1;
+        }
     }
 }
 
@@ -92,7 +104,8 @@ fn main() {
         let mut src = String::new();
         file.read_to_string(&mut src).expect("failed to read");
         let (prog, rom) = compiler(&src);
-        vcpu_runner(&prog, &rom);
+        let mut vcpu = VCPU::new();
+        vcpu.runner(&prog, &rom);
     } else {
         eprintln!("usage: brainfuck <file.bf>");
     }
