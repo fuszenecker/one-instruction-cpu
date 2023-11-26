@@ -29,6 +29,7 @@ fn compiler(src: &str) -> (Vec<Instr>, Vec<u8>) {
                 rom.push(parser(x) as u8);
             }
         } else {
+	    eprintln!("{line}");
             let addr_a = parser(first) as u8;
             let addr_b = parser(token.next().unwrap()) as u8;
             let jmpaddr = parser(token.next().unwrap());
